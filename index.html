@@ -1,22 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>AI Domain Generator</title>
-  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    input, button { font-size: 16px; padding: 8px; }
+    button { cursor: pointer; margin-left: 8px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; }
+  </style>
 </head>
 <body>
   <h1>🚀 AI-Generated Domains for Sale</h1>
-  <p>We use AI to remix and reimagine existing domains into brand-worthy names.</p>
+  <p>We remix existing domains into brand-worthy names using AI logic.</p>
 
-  <h2>Available Domains</h2>
-  <ul id="domain-list">
-    <li>greensolutionshub.com</li>
-    <li>techvibesnova.com</li>
-    <li>urbannestedge.com</li>
-  </ul>
+  <h3>Enter a domain to remix:</h3>
+  <input type="text" id="domainInput" placeholder="e.g. GreenSolutionsNow.com" />
+  <button onclick="generateDomains()">Generate</button>
 
-  <p>Interested? <a href="https://forms.gle/yourformlink" target="_blank">Request a Domain</a></p>
+  <h3>Suggested Domains</h3>
+  <ul id="suggestionsList"></ul>
+
+  <p>Want one? <a href="https://forms.gle/yourformlink" target="_blank">Request this domain</a></p>
 
   <footer><small>Powered by AI & your creativity ✨</small></footer>
+
+  <script>
+    // Trendy and niche suffixes inspired by real-world startups & popular words
+    const suffixes = [
+      "ly", "io", "ify", "ster", "hub", "base", "nest", "ify", "scape", "ify",
+      "matic", "scape", "wise", "verse", "nova", "spark", "boost", "loop",
+      "gen", "edge", "labs", "works", "zone", "craft", "ware", "bot", "logic",
+      "wave", "shift", "core", "flow", "grid", "pilot", "dash", "prime"
+    ];
+
+    // Common domain extensions to strip
+    const domainExtensions = [
+      ".com", ".net", ".org", ".io", ".co", ".app", ".ai", ".dev", ".tech", ".me"
+    ];
+
+    // Strip domain extension function
+    function stripExtension(domain) {
+      domain = domain.toLowerCase().trim();
+      for (const ext of domainExtensions) {
+        if (domain.endsWith(ext)) {
+          return domain.slice(0, -ext.length);
+        }
+      }
+      return domain;
+    }
+
+    // Split camelCase, snake_case, kebab-case, and numbers into words
+    function splitIntoWords(name) {
+      // Replace _ and - with space for splitting
+      name = name.replace(/[_\-]/g, " ");
+      // Split by spaces first
+      let words = name.split(" ");
+
+      // Further split camelCase and numbers within each word
+      let finalWords = [];
+      words.forEach(word => {
+        let parts = word.match(/[A-Z]?[a-z]+|[0-9]+/g);
+        if (parts) {
+          finalWords = finalWords.concat(parts);
+        }
+      });
+      return finalWords.filter(Boolean);
+    }
+
+    // Generate domain suggestions
+    function generateDomains() {
+      const input = document.getElementById("domainInput").value;
+      if (!input) return alert("Please enter a domain!");
+
+      const base = stripExtension(input);
+      const words = splitIntoWords(base);
+
+      if (words.length === 0) return alert("Could not parse domain name!");
+
+      const suggestions = new Set();
+
+      // 1. Try short, memorable combos first (just the base or base + suffix)
+      // Prioritize suggestions with 1 or 2 words + suffix, short length
+      words.forEach(word => {
+        suffixes.forEach(suffix => {
+          let candidate = (word + suffix).toLowerCase();
+          if (candidate.length <= 10) suggestions.add(candidate + ".com");
+        });
+      });
+
+      // 2. Combine all words together + suffix (for longer names)
+      suffixes.forEach(suffix => {
+        const combined = words.join("").toLowerCase() + suffix;
+        if (combined.length <= 15) suggestions.add(combined + ".com");
+      });
+
+      // 3. Just the base without suffix (if short)
+      if (base.length <= 10) suggestions.add(base + ".com");
+
+      // Convert Set to Array and sort by length ascending (shortest first)
+      const sortedSuggestions = Array.from(suggestions).sort((a, b) => a.length - b.length);
+
+      // Display
+      const list = document.getElementById("suggestionsList");
+      list.innerHTML = "";
+
+      sortedSuggestions.forEach(domain => {
+        const li = document.createElement("li");
+        li.textContent = domain;
+        list.appendChild(li);
+      });
+    }
+  </script>
 </body>
 </html>
