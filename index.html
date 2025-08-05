@@ -1,117 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>AI Domain Generator</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
-    input, button { font-size: 16px; padding: 8px; }
-    button { cursor: pointer; margin-left: 8px; }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 6px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Domain Generator & Availability Checker</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 0 20px;
+    background: #f5f7fa;
+    color: #222;
+  }
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+  }
+  input[type="text"] {
+    width: 70%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    margin-right: 10px;
+  }
+  button {
+    padding: 11px 18px;
+    font-size: 16px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #219150;
+  }
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  li {
+    background: white;
+    margin: 10px 0;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 7px rgb(0 0 0 / 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .domain-name {
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .status {
+    margin-left: 10px;
+    font-size: 20px;
+  }
+  .available {
+    color: #27ae60;
+  }
+  .taken {
+    color: #c0392b;
+  }
+  .request-btn {
+    background: #2980b9;
+    border: none;
+    color: white;
+    padding: 7px 15px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+    text-decoration: none;
+  }
+  .request-btn:hover {
+    background: #1f5a87;
+  }
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #555;
+  }
+  @media (max-width: 600px) {
+    input[type="text"] {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+    }
+    li {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .request-btn {
+      margin-top: 10px;
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
 </head>
 <body>
-  <h1>🚀 AI-Generated Domains for Sale</h1>
-  <p>We remix existing domains into brand-worthy names using AI logic.</p>
+  <h1>🚀 AI Domain Generator & Availability Checker</h1>
+  <p style="text-align:center; max-width: 450px; margin: auto; color:#555;">
+    Enter a domain name to remix or get fresh, creative domain suggestions.
+    Check availability live and request your favorite domains below!
+  </p>
 
-  <h3>Enter a domain to remix:</h3>
-  <input type="text" id="domainInput" placeholder="e.g. GreenSolutionsNow.com" />
-  <button onclick="generateDomains()">Generate</button>
+  <div style="text-align:center; margin: 20px 0;">
+    <input type="text" id="domainInput" placeholder="e.g. GreenSolutionsNow.com or FreshIdea" />
+    <button onclick="generateDomains()">Generate Domains</button>
+  </div>
 
-  <h3>Suggested Domains</h3>
   <ul id="suggestionsList"></ul>
 
-  <p>Want one? <a href="https://forms.gle/Fvq1N9PaNs6yferE8" target="_blank">Request this domain</a></p>
+  <footer><small>Powered by AI & your creativity ✨ | <a href="https://docs.google.com/forms/d/e/1FAIpQLSfG9mcPw8lov_OrRIv0eQOlUQoiRZtmdBDCumlF8-A4_ldg6w/viewform?usp=pp_url&entry.427599089=testdomain.com&entry.1396755228=abcd1234@yahoo.com&entry.503272573=$5-$500" target="_blank">Request a Domain</a></small></footer>
 
-  <footer><small>Powered by AI & your creativity ✨</small></footer>
+<script>
+  // Suffixes inspired by trendy & niche startups + tech buzzwords
+  const suffixes = [
+    "ly", "io", "ify", "ster", "hub", "base", "nest", "scape", "matic", "wise",
+    "verse", "nova", "spark", "boost", "loop", "gen", "edge", "labs", "works",
+    "zone", "craft", "ware", "bot", "logic", "wave", "shift", "core", "flow",
+    "grid", "pilot", "dash", "prime"
+  ];
 
-  <script>
-    // Trendy and niche suffixes inspired by real-world startups & popular words
-    const suffixes = [
-      "ly", "io", "ify", "ster", "hub", "base", "nest", "ify", "scape", "ify",
-      "matic", "scape", "wise", "verse", "nova", "spark", "boost", "loop",
-      "gen", "edge", "labs", "works", "zone", "craft", "ware", "bot", "logic",
-      "wave", "shift", "core", "flow", "grid", "pilot", "dash", "prime"
-    ];
+  // Some popular prefixes for fresh domain suggestions
+  const prefixes = [
+    "get", "go", "try", "my", "the", "best", "top", "easy", "smart", "super"
+  ];
 
-    // Common domain extensions to strip
-    const domainExtensions = [
-      ".com", ".net", ".org", ".io", ".co", ".app", ".ai", ".dev", ".tech", ".me"
-    ];
+  // Domain extensions we'll check for availability
+  const domainExtensions = [".com", ".net", ".org", ".io"];
 
-    // Strip domain extension function
-    function stripExtension(domain) {
-      domain = domain.toLowerCase().trim();
-      for (const ext of domainExtensions) {
-        if (domain.endsWith(ext)) {
-          return domain.slice(0, -ext.length);
-        }
+  // Strip domain extension
+  function stripExtension(domain) {
+    domain = domain.toLowerCase().trim();
+    for (const ext of domainExtensions) {
+      if (domain.endsWith(ext)) {
+        return domain.slice(0, -ext.length);
       }
-      return domain;
     }
+    return domain;
+  }
 
-    // Split camelCase, snake_case, kebab-case, and numbers into words
-    function splitIntoWords(name) {
-      // Replace _ and - with space for splitting
-      name = name.replace(/[_\-]/g, " ");
-      // Split by spaces first
-      let words = name.split(" ");
+  // Split into words, handling camelCase, numbers, dashes, underscores
+  function splitIntoWords(name) {
+    name = name.replace(/[_\-]/g, " ");
+    let words = name.split(" ");
+    let finalWords = [];
+    words.forEach(word => {
+      let parts = word.match(/[A-Z]?[a-z]+|[0-9]+/g);
+      if (parts) finalWords = finalWords.concat(parts);
+    });
+    return finalWords.filter(Boolean);
+  }
 
-      // Further split camelCase and numbers within each word
-      let finalWords = [];
-      words.forEach(word => {
-        let parts = word.match(/[A-Z]?[a-z]+|[0-9]+/g);
-        if (parts) {
-          finalWords = finalWords.concat(parts);
-        }
-      });
-      return finalWords.filter(Boolean);
-    }
+  // Generate domain suggestions remixing input + brand new
+  function generateDomains() {
+    const input = document.getElementById("domainInput").value.trim();
+    if (!input) return alert("Please enter a domain or name!");
 
-    // Generate domain suggestions
-    function generateDomains() {
-      const input = document.getElementById("domainInput").value;
-      if (!input) return alert("Please enter a domain!");
+    const base = stripExtension(input);
+    const words = splitIntoWords(base);
 
-      const base = stripExtension(input);
-      const words = splitIntoWords(base);
+    let suggestionsSet = new Set();
 
-      if (words.length === 0) return alert("Could not parse domain name!");
-
-      const suggestions = new Set();
-
-      // 1. Try short, memorable combos first (just the base or base + suffix)
-      // Prioritize suggestions with 1 or 2 words + suffix, short length
-      words.forEach(word => {
-        suffixes.forEach(suffix => {
-          let candidate = (word + suffix).toLowerCase();
-          if (candidate.length <= 10) suggestions.add(candidate + ".com");
-        });
-      });
-
-      // 2. Combine all words together + suffix (for longer names)
+    // 1. Remix input words with suffixes (short & memorable first)
+    words.forEach(word => {
       suffixes.forEach(suffix => {
-        const combined = words.join("").toLowerCase() + suffix;
-        if (combined.length <= 15) suggestions.add(combined + ".com");
+        const candidate = (word + suffix).toLowerCase();
+        if (candidate.length <= 12) suggestionsSet.add(candidate);
       });
+    });
 
-      // 3. Just the base without suffix (if short)
-      if (base.length <= 10) suggestions.add(base + ".com");
+    // 2. Combine all words + suffix (longer combos)
+    suffixes.forEach(suffix => {
+      const combined = words.join("").toLowerCase() + suffix;
+      if (combined.length <= 15) suggestionsSet.add(combined);
+    });
 
-      // Convert Set to Array and sort by length ascending (shortest first)
-      const sortedSuggestions = Array.from(suggestions).sort((a, b) => a.length - b.length);
+    // 3. Add base word only if short
+    if (base.length <= 12) suggestionsSet.add(base);
 
-      // Display
-      const list = document.getElementById("suggestionsList");
+    // 4. Generate totally new creative domains (prefix + random suffix)
+    prefixes.forEach(prefix => {
+      suffixes.forEach(suffix => {
+        let candidate = (prefix + suffix).toLowerCase();
+        if (candidate.length <= 12) suggestionsSet.add(candidate);
+      });
+    });
+
+    // Prepare final list
+    let suggestions = Array.from(suggestionsSet).map(name => name + ".com");
+    suggestions.sort((a, b) => a.length - b.length);
+
+    // Clear list and show loading spinner
+    const list = document.getElementById("suggestionsList");
+    list.innerHTML = "<li>Checking availability...</li>";
+
+    // Check availability for all suggestions via Domainr API
+    checkDomainsAvailability(suggestions).then(results => {
       list.innerHTML = "";
-
-      sortedSuggestions.forEach(domain => {
+      results.forEach(({domain, available}) => {
         const li = document.createElement("li");
-        li.textContent = domain;
+
+        const domainSpan = document.createElement("span");
+        domainSpan.textContent = domain;
+        domainSpan.className = "domain-name";
+
+        const statusSpan = document.createElement("span");
+        statusSpan.className = "status";
+        statusSpan.innerHTML = available ? "✅" : "❌";
+        statusSpan.classList.add(available ? "available" : "taken");
+
+        const requestBtn = document.createElement("a");
+        requestBtn.href = `https://docs.google.com/forms/d/e/1FAIpQLSfG9mcPw8lov_OrRIv0eQOlUQoiRZtmdBDCumlF8-A4_ldg6w/viewform?entry.427599089=${encodeURIComponent(domain)}`;
+        requestBtn.target = "_blank";
+        requestBtn.textContent = "Request";
+        requestBtn.className = "request-btn";
+        requestBtn.style.marginLeft = "15px";
+        if (!available) requestBtn.style.opacity = "0.5";
+
+        li.appendChild(domainSpan);
+        li.appendChild(statusSpan);
+        li.appendChild(requestBtn);
+
         list.appendChild(li);
       });
+    });
+  }
+
+  // Check availability using Domainr API
+  async function checkDomainsAvailability(domains) {
+    // Domainr API allows batch queries with comma separated domains
+    // We'll query in batches of max 10 domains to be safe
+    const results = [];
+    const batchSize = 10;
+
+    for (let i = 0; i < domains.length; i += batchSize) {
+      const batch = domains.slice(i, i + batchSize).join(",");
+      const url = `https://api.domainr.com/v2/status?domain=${batch}&client_id=domainr`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.status) {
+          data.status.forEach(statusItem => {
+            // availability can be "inactive" (available) or "active" (taken)
+            const available = statusItem.status.includes("inactive");
+            results.push({domain: statusItem.domain, available});
+          });
+        }
+      } catch (e) {
+        console.error("Domain availability API error:", e);
+        // If error, mark all batch domains as unknown/unavailable
+        batch.split(",").forEach(d => results.push({domain: d, available: false}));
+      }
     }
-  </script>
+    return results;
+  }
+</script>
+
 </body>
 </html>
