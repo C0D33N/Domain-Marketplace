@@ -163,44 +163,53 @@
   }
 
   // Generate domain suggestions remixing input + brand new
-  function generateDomains() {
-    const input = document.getElementById("domainInput").value.trim();
-    if (!input) return alert("Please enter a domain or name!");
+function generateDomains() {
+  const input = document.getElementById("domainInput").value.trim();
+  if (!input) return alert("Please enter a domain or name!");
 
-    const base = stripExtension(input);
-    const words = splitIntoWords(base);
+  const base = stripExtension(input);
+  const words = splitIntoWords(base);
 
-    let suggestionsSet = new Set();
+  let suggestionsSet = new Set();
 
-    // 1. Remix input words with suffixes (short & memorable first)
-    words.forEach(word => {
-      suffixes.forEach(suffix => {
-        const candidate = (word + suffix).toLowerCase();
-        if (candidate.length <= 12) suggestionsSet.add(candidate);
-      });
-    });
+  // 1. Base word only (if short)
+  if (base.length <= 12) suggestionsSet.add(base);
 
-    // 2. Combine all words + suffix (longer combos)
+  // 2. Remix each input word + suffixes (short names)
+  words.forEach(word => {
     suffixes.forEach(suffix => {
-      const combined = words.join("").toLowerCase() + suffix;
-      if (combined.length <= 15) suggestionsSet.add(combined);
+      const candidate = (word + suffix).toLowerCase();
+      if (candidate.length <= 12) suggestionsSet.add(candidate);
     });
+  });
 
-    // 3. Add base word only if short
-    if (base.length <= 12) suggestionsSet.add(base);
+  // 3. Combine all input words + suffix (longer combos)
+  suffixes.forEach(suffix => {
+    const combined = words.join("").toLowerCase() + suffix;
+    if (combined.length <= 15) suggestionsSet.add(combined);
+  });
 
-    // 4. Generate totally new creative domains (prefix + random suffix)
+  // 4. Completely new domains (prefix + suffix) *only if input is empty or special category*
+  // (Optional) Show separately or only if input is very short or empty
+  // For now, comment this out or run only when input is blank
+  /*
+  if (input.length < 3) {
     prefixes.forEach(prefix => {
       suffixes.forEach(suffix => {
         let candidate = (prefix + suffix).toLowerCase();
         if (candidate.length <= 12) suggestionsSet.add(candidate);
       });
     });
+  }
+  */
 
-    // Prepare final list
-    let suggestions = Array.from(suggestionsSet).map(name => name + ".com");
-    suggestions.sort((a, b) => a.length - b.length);
+  // Prepare suggestions list
+  let suggestions = Array.from(suggestionsSet).map(name => name + ".com");
+  suggestions.sort((a, b) => a.length - b.length);
 
+  // Then check availability and display...
+  // (rest of your code)
+}
     // Clear list and show loading spinner
     const list = document.getElementById("suggestionsList");
     list.innerHTML = "<li>Checking availability...</li>";
