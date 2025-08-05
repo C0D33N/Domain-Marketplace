@@ -238,34 +238,42 @@
   }
 
   // Check availability using Domainr API
-  async function checkDomainsAvailability(domains) {
-    // Domainr API allows batch queries with comma separated domains
-    // We'll query in batches of max 10 domains to be safe
-    const results = [];
-    const batchSize = 10;
+async function checkDomainsAvailability(domains) {
+  const results = [];
+  const batchSize = 10;
 
-    for (let i = 0; i < domains.length; i += batchSize) {
-      const batch = domains.slice(i, i + batchSize).join(",");
-      const url = `https://api.domainr.com/v2/status?domain=${batch}&client_id=domainr`;
+  for (let i = 0; i < domains.length; i += batchSize) {
+    const batch = domains.slice(i, i + batchSize).join(",");
+    const url = `https://api.domainr.com/v2/status?domain=${batch}&client_id=domainr`;
 
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.status) {
-          data.status.forEach(statusItem => {
-            // availability can be "inactive" (available) or "active" (taken)
-            const available = statusItem.status.includes("inactive");
-            results.push({domain: statusItem.domain, available});
-          });
-        }
-      } catch (e) {
-        console.error("Domain availability API error:", e);
-        // If error, mark all batch domains as unknown/unavailable
-        batch.split(",").forEach(d => results.push({domain: d, available: false}));
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status) {
+        data.status.forEach(statusItem => {
+          // Log status for debugging
+          console.log(statusItem.domain, statusItem.status);
+
+          // Domain considered available if status includes 'inactive' or 'undelegated'
+          const available = statusItem.status.some(s =>
+            s === "inactive" || s === "undelegated"
+          );
+
+          results.push({ domain: statusItem.domain, available });
+        });
+      } else {
+        // No status returned? Mark all batch domains unavailable
+        batch.split(",").forEach(d => results.push({ domain: d, available: false }));
       }
+    } catch (e) {
+      console.error("Domain availability API error:", e);
+      // Error fallback: mark all batch domains unavailable
+      batch.split(",").forEach(d => results.push({ domain: d, available: false }));
     }
-    return results;
   }
+  return results;
+}
 </script>
 
 </body>
